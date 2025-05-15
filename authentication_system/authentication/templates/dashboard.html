@@ -1,0 +1,721 @@
+{% block title %}Dashboard - SecureAuth{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-sidebar">
+        <div class="user-profile-card">
+            <div class="avatar-container">
+                {% if user.userprofile.avatar %}
+                    <img src="{{ user.userprofile.avatar.url }}" alt="Profile Picture" class="avatar">
+                {% else %}
+                    <div class="avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+            </div>
+            <h3>{{ user.get_full_name|default:user.username }}</h3>
+            <p class="user-email">{{ user.email }}</p>
+            <p class="member-since">Member since {{ user.date_joined|date:"F Y" }}</p>
+        </div>
+        
+        <nav class="dashboard-nav">
+            <ul>
+                <li class="nav-item active" data-section="profile">
+                    <i class="fas fa-user"></i> Profile
+                </li>
+                <li class="nav-item" data-section="security">
+                    <i class="fas fa-shield-alt"></i> Security
+                </li>
+                <li class="nav-item" data-section="delete">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="dashboard-content">
+        <!-- Profile Section -->
+        <section id="profile-section" class="dashboard-section active">
+            <h2>Profile Information</h2>
+            <form method="post" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="profile">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea name="bio">{{ user.userprofile.bio }}</textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phone_number" value="{{ user.userprofile.phone_number }}">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" value="{{ user.userprofile.location }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Profile Picture</label>
+                    <div class="file-upload">
+                        <input type="file" name="avatar" id="avatar-upload" accept="image/*">
+                        <label for="avatar-upload" class="upload-btn">
+                            <i class="fas fa-upload"></i> Choose File
+                        </label>
+                        <span id="file-name">No file chosen</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update Profile</button>
+            </form>
+        </section>
+        
+        <!-- Security Section -->
+        <section id="security-section" class="dashboard-section">
+            <h2>Security Settings</h2>
+            <form method="post" class="security-form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="password">
+                
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" name="current_password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" name="new_password1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" name="new_password2" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Change Password</button>
+            </form>
+        </section>
+        
+        <!-- Delete Account Section -->
+        <section id="delete-section" class="dashboard-section">
+            <h2>Delete Account</h2>
+            <div class="delete-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Warning: This action cannot be undone</h3>
+                <p>All your data will be permanently deleted from our systems.</p>
+            </div>
+            
+            <form method="post" class="delete-form">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="delete">
+                
+                <div class="form-group">
+                    <label>Enter your password to confirm</label>
+                    <input type="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-danger">Delete My Account</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+{% comment %} <style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        min-height: calc(100vh - 80px);
+        padding-top: 80px;
+    }
+
+    .dashboard-sidebar {
+        background: var(--white);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        padding: 2rem 1rem;
+        position: fixed;
+        height: 100%;
+        width: 280px;
+    }
+
+    .user-profile-card {
+        text-align: center;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .avatar-container {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        overflow: hidden;
+        background: var(--gradient-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+
+    .user-profile-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+    }
+
+    .user-email {
+        color: var(--text-light);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .member-since {
+        color: var(--text-light);
+        font-size: 0.8rem;
+        font-style: italic;
+    }
+
+    .dashboard-nav ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .nav-item {
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        transition: all 0.3s ease;
+        color: var(--text-light);
+    }
+
+    .nav-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .nav-item:hover {
+        background: var(--gradient-light);
+        color: var(--primary-color);
+    }
+
+    .nav-item.active {
+        background: var(--gradient);
+        color: var(--white);
+    }
+
+    .dashboard-content {
+        padding: 2rem 3rem;
+        margin-left: 280px;
+    }
+
+    .dashboard-section {
+        display: none;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .dashboard-section.active {
+        display: block;
+    }
+
+    .dashboard-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-color);
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .dashboard-section h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: var(--gradient);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .file-upload {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .upload-btn {
+        padding: 0.8rem 1.5rem;
+        background: var(--gradient-light);
+        color: var(--primary-color);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        background: var(--gradient);
+        color: var(--white);
+    }
+
+    #avatar-upload {
+        display: none;
+    }
+
+    #file-name {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .btn-danger {
+        background: linear-gradient(45deg, #f44336, #d32f2f);
+        color: var(--white);
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(45deg, #d32f2f, #b71c1c);
+    }
+
+    .delete-warning {
+        background: #fff8f8;
+        border-left: 4px solid #f44336;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-radius: 0 var(--border-radius) var(--border-radius) 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .delete-warning i {
+        color: #f44336;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .delete-warning h3 {
+        color: #f44336;
+        margin: 0;
+    }
+
+    .delete-warning p {
+        color: var(--text-light);
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-sidebar {
+            position: static;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .dashboard-content {
+            margin-left: 0;
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style> {% endcomment %}
+
+<style>
+    :root {
+        --primary-color: #6366f1;
+        --text-color: #1f2937;
+        --text-light: #6b7280;
+        --white: #ffffff;
+        --gradient: linear-gradient(to right, #667eea, #764ba2);
+        --gradient-light: linear-gradient(to right, #edf2f7, #e2e8f0);
+        --border-radius: 8px;
+    }
+
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        min-height: calc(100vh - 80px);
+        padding-top: 80px;
+    }
+
+    .dashboard-sidebar {
+        background: var(--white);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        padding: 2rem 1rem;
+        position: fixed;
+        height: 100%;
+        width: 280px;
+        overflow-y: auto;
+    }
+
+    .user-profile-card {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .avatar-container {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        overflow: hidden;
+        background: var(--gradient-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+
+    .user-profile-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+        color: var(--text-color);
+    }
+
+    .user-email, .member-since {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+
+    .member-since {
+        font-style: italic;
+    }
+
+    .dashboard-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-item {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-color);
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-item:hover {
+        background: var(--gradient-light);
+        color: var(--primary-color);
+    }
+
+    .nav-item.active {
+        background: var(--gradient);
+        color: var(--white);
+    }
+
+    .dashboard-content {
+        padding: 2rem 3rem;
+        margin-left: 280px;
+        background: #f9fafb;
+        min-height: 100vh;
+    }
+
+    .dashboard-section {
+        display: none;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .dashboard-section.active {
+        display: block;
+    }
+
+    .dashboard-section h2 {
+        font-size: 1.75rem;
+        color: var(--text-color);
+        margin-bottom: 1.25rem;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 0.25rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        color: var(--text-color);
+        background: var(--white);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        outline: none;
+    }
+
+    .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .file-upload {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .upload-btn {
+        background: var(--gradient-light);
+        color: var(--primary-color);
+        padding: 0.6rem 1.2rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: background 0.3s ease;
+    }
+
+    .upload-btn:hover {
+        background: var(--gradient);
+        color: var(--white);
+    }
+
+    #avatar-upload {
+        display: none;
+    }
+
+    #file-name {
+        font-size: 0.9rem;
+        color: var(--text-light);
+    }
+
+    .btn.btn-primary {
+        background: var(--gradient);
+        color: var(--white);
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.3s ease;
+    }
+
+    .btn.btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .btn-danger {
+        background: linear-gradient(to right, #e53935, #d32f2f);
+        color: var(--white);
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(to right, #c62828, #b71c1c);
+    }
+
+    .delete-warning {
+        background: #fff1f1;
+        border-left: 4px solid #e53935;
+        padding: 1.25rem;
+        margin-bottom: 2rem;
+        border-radius: var(--border-radius);
+    }
+
+    .delete-warning i {
+        color: #e53935;
+        font-size: 1.25rem;
+    }
+
+    .delete-warning h3 {
+        margin: 0.5rem 0;
+        color: #e53935;
+    }
+
+    .delete-warning p {
+        color: var(--text-light);
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-sidebar {
+            position: static;
+            width: 100%;
+            height: auto;
+        }
+
+        .dashboard-content {
+            margin-left: 0;
+            padding: 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+
+<script>
+    // Dashboard navigation
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            // Remove active class from all items
+            document.querySelectorAll('.nav-item').forEach(navItem => {
+                navItem.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            this.classList.add('active');
+            
+            // Hide all sections
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const sectionId = this.getAttribute('data-section') + '-section';
+            document.getElementById(sectionId).classList.add('active');
+        });
+    });
+    
+    // File upload display
+    document.getElementById('avatar-upload').addEventListener('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+        document.getElementById('file-name').textContent = fileName;
+    });
+    
+    // Form submission handling
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        });
+    });
+</script>
+{% endblock %}
