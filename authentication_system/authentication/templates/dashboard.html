@@ -5,8 +5,8 @@
     <div class="dashboard-sidebar">
         <div class="user-profile-card">
             <div class="avatar-container">
-                {% if user.userprofile.avatar %}
-                    <img src="{{ user.userprofile.avatar.url }}" alt="Profile Picture" class="avatar">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="Profile Picture" class="avatar">
                 {% else %}
                     <div class="avatar-placeholder">
                         <i class="fas fa-user"></i>
@@ -47,6 +47,7 @@
             
             <div class="current-info">
                 <h3>Current Information</h3>
+                {% if profile %}
                 <div class="info-grid">
                     <div class="info-item">
                         <label>First Name</label>
@@ -62,25 +63,28 @@
                     </div>
                     <div class="info-item">
                         <label>Bio</label>
-                        <p>{{ user.userprofile.bio|default:"Not set" }}</p>
+                        <p>{{ profile.bio|default:"Not set" }}</p>
                     </div>
                     <div class="info-item">
                         <label>Phone Number</label>
-                        <p>{{ user.userprofile.phone_number|default:"Not set" }}</p>
+                        <p>{{ profile.phone_number|default:"Not set" }}</p>
                     </div>
                     <div class="info-item">
                         <label>Location</label>
-                        <p>{{ user.userprofile.location|default:"Not set" }}</p>
+                        <p>{{ profile.location|default:"Not set" }}</p>
                     </div>
                     <div class="info-item">
                         <label>Birth Date</label>
-                        <p>{{ user.userprofile.birth_date|date:"F d, Y"|default:"Not set" }}</p>
+                        <p>{{ profile.birth_date|date:"F d, Y"|default:"Not set" }}</p>
                     </div>
                     <div class="info-item">
                         <label>Website</label>
-                        <p>{{ user.userprofile.website|default:"Not set" }}</p>
+                        <p>{{ profile.website|default:"Not set" }}</p>
                     </div>
                 </div>
+                {% else %}
+                <p>No profile data available. Please update your profile below.</p>
+                {% endif %}
             </div>
             
             <form method="post" enctype="multipart/form-data" class="profile-form" id="profile-form">
@@ -105,28 +109,28 @@
                 
                 <div class="form-group">
                     <label>Bio</label>
-                    <textarea name="bio">{{ user.userprofile.bio }}</textarea>
+                    <textarea name="bio">{{ profile.bio }}</textarea>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="tel" name="phone_number" value="{{ user.userprofile.phone_number }}" pattern="[0-9]{10,}">
+                        <input type="tel" name="phone_number" value="{{ profile.phone_number }}" pattern="[0-9]{10,}">
                     </div>
                     <div class="form-group">
                         <label>Location</label>
-                        <input type="text" name="location" value="{{ user.userprofile.location }}">
+                        <input type="text" name="location" value="{{ profile.location }}">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Birth Date</label>
-                        <input type="date" name="birth_date" value="{{ user.userprofile.birth_date|date:'Y-m-d' }}">
+                        <input type="date" name="birth_date" value="{{ profile.birth_date|date:'Y-m-d' }}">
                     </div>
                     <div class="form-group">
                         <label>Website</label>
-                        <input type="url" name="website" value="{{ user.userprofile.website }}">
+                        <input type="url" name="website" value="{{ profile.website }}">
                     </div>
                 </div>
                 
@@ -139,7 +143,6 @@
             </form>
         </section>
         
-        <!-- Rest of the template remains unchanged -->
         <section id="security-section" class="dashboard-section">
             <div class="section-header">
                 <h2>Security Settings</h2>
@@ -708,7 +711,6 @@
                     } else if (data.avatar_url) {
                         document.querySelector('.avatar').src = data.avatar_url;
                     } else if (this.id === 'profile-form') {
-                        // Refresh page to update current information
                         setTimeout(() => window.location.reload(), 1000);
                     }
                 } else {

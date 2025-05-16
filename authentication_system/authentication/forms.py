@@ -2,6 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import UserProfile
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -22,12 +25,14 @@ class CustomUserCreationForm(UserCreationForm):
         user.last_name = self.cleaned_data["last_name"]
         if commit:
             user.save()
-            # Create or update UserProfile
+            logger.info(f"Created user: {user.username} with email: {user.email}")
             profile, created = UserProfile.objects.get_or_create(user=user)
             profile.phone_number = self.cleaned_data["phone_number"]
             profile.bio = self.cleaned_data["bio"]
             profile.location = self.cleaned_data["location"]
             profile.save()
+            logger.info(f"{'Created' if created else 'Updated'} UserProfile for user: {user.username} with bio: {profile.bio}")
+            print(f"DEBUG: Saved user {user.username} with profile bio: {profile.bio}")  # Temporary debug
         return user
 
 class UserProfileForm(forms.ModelForm):

@@ -9,7 +9,6 @@ from django.contrib.auth.forms import PasswordChangeForm
 from .forms import CustomUserCreationForm, UserProfileForm
 from .models import UserProfile
 import json
-from django.core.exceptions import ValidationError
 import os
 import logging
 
@@ -23,11 +22,15 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
+            logger.info(f"Registration successful for {user.username}")
+            print(f"DEBUG: Registered user {user.username} with email: {user.email}")  # Temporary debug
             messages.success(request, 'Account created successfully! You can now log in.')
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'message': 'Registration successful!', 'redirect_url': '/login/'})
             return redirect('login')
         else:
+            logger.error(f"Registration failed: {form.errors}")
+            print(f"DEBUG: Registration errors: {form.errors}")  # Temporary debug
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': False,
@@ -58,21 +61,26 @@ def login_view(request):
 
 @login_required
 def dashboard_view(request):
-    # Ensure UserProfile exists
     try:
         profile = request.user.userprofile
+        logger.info(f"Profile retrieved for {request.user.username}: bio={profile.bio}")
+        print(f"DEBUG: Profile for {request.user.username}: bio={profile.bio}, phone={profile.phone_number}")  # Temporary debug
     except UserProfile.DoesNotExist:
         logger.warning(f"Creating missing UserProfile for user: {request.user.username}")
         profile = UserProfile.objects.create(user=request.user)
+        print(f"DEBUG: Created new UserProfile for {request.user.username}")  # Temporary debug
+
+    context = {
+        'user': request.user,
+        'profile': profile
+    }
 
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
         
         if form_type == 'avatar':
-            # Handle avatar upload only
             if 'avatar' in request.FILES:
                 avatar = request.FILES['avatar']
-                # Validate file type and size
                 valid_extensions = ['.jpg', '.jpeg', '.png', '.gif']
                 ext = os.path.splitext(avatar.name)[1].lower()
                 if ext not in valid_extensions:
@@ -80,13 +88,15 @@ def dashboard_view(request):
                         'success': False,
                         'error': 'Invalid file type. Only JPG, PNG, and GIF are allowed.'
                     })
-                if avatar.size > 5 * 1024 * 1024:  # 5MB limit
+                if avatar.size > 5 * 1024 * 1024:
                     return JsonResponse({
                         'success': False,
                         'error': 'File size too large. Maximum is 5MB.'
                     })
                 profile.avatar = avatar
                 profile.save()
+                logger.info(f"Avatar updated for {request.user.username}")
+                print(f"DEBUG: Avatar updated for {request.user.username}")  # Temporary debug
                 return JsonResponse({
                     'success': True,
                     'message': 'Profile picture updated successfully!',
@@ -98,44 +108,30 @@ def dashboard_view(request):
             })
             
         elif form_type == 'profile':
-            # Update profile information
             user = request.user
             user.first_name = request.POST.get('first_name', '')
             user.last_name = request.POST.get('last_name', '')
             user.email = request.POST.get('email', '')
-            
-            try:
-                user.full_clean()  # Validate user data
-                user.save()
-            except ValidationError as e:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Invalid user data: ' + str(e)
-                })
+            user.save()
             
             profile.bio = request.POST.get('bio', '')
             profile.phone_number = request.POST.get('phone_number', '')
             profile.location = request.POST.get('location', '')
-            profile.birth_date = request.POST.get('birth_date')  # Handle date input
+            birth_date = request.POST.get('birth_date')
+            profile.birth_date = birth_date if birth_date else None
             profile.website = request.POST.get('website', '')
             if 'avatar' in request.FILES:
                 profile.avatar = request.FILES['avatar']
+            profile.save()
+            logger.info(f"Profile updated for {request.user.username}: bio={profile.bio}")
+            print(f"DEBUG: Profile updated for {request.user.username}: bio={profile.bio}")  # Temporary debug
             
-            try:
-                profile.full_clean()  # Validate profile data
-                profile.save()
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Profile updated successfully!'
-                })
-            except ValidationError as e:
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Invalid profile data: ' + str(e)
-                })
+            return JsonResponse({
+                'success': True,
+                'message': 'Profile updated successfully!'
+            })
             
         elif form_type == 'password':
-            # Change password
             current_password = request.POST.get('current_password')
             new_password1 = request.POST.get('new_password1')
             new_password2 = request.POST.get('new_password2')
@@ -167,7 +163,6 @@ def dashboard_view(request):
             })
             
         elif form_type == 'delete':
-            # Delete account
             password = request.POST.get('password')
             user = authenticate(username=request.user.username, password=password)
             
@@ -184,7 +179,7 @@ def dashboard_view(request):
                     'error': 'Invalid password. Account deletion failed.'
                 })
     
-    return render(request, 'dashboard.html', {'user': request.user})
+    return render(request, 'dashboard.html', context)
 
 def logout_view(request):
     logout(request)
