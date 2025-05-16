@@ -1,698 +1,114 @@
-{% extends 'base.html' %}
-
 {% block title %}Sign Up - SecureAuth{% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="auth-background"></div>
-    <div class="auth-card signup-card">
-        <div class="auth-header">
-            <h2 class="auth-title">Create Account</h2>
-            <p class="auth-subtitle">Join our secure platform</p>
+<div class="signup-container">
+    <h2>Sign Up</h2>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
         </div>
-        
-        <div class="auth-form-container">
-            <form method="post" class="auth-form" id="signupForm">
-                {% csrf_token %}
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="id_first_name" class="form-label">First Name</label>
-                        <div class="input-group">
-                            <i class="fas fa-user input-icon"></i>
-                            <input type="text" 
-                                   name="first_name" 
-                                   id="id_first_name" 
-                                   class="form-control" 
-                                   placeholder="Enter your first name"
-                                   required
-                                   value="{{ form.first_name.value|default:'' }}">
-                        </div>
-                        {% if form.first_name.errors %}
-                            <div class="error-message">{{ form.first_name.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="id_last_name" class="form-label">Last Name</label>
-                        <div class="input-group">
-                            <i class="fas fa-user input-icon"></i>
-                            <input type="text" 
-                                   name="last_name" 
-                                   id="id_last_name" 
-                                   class="form-control" 
-                                   placeholder="Enter your last name"
-                                   required
-                                   value="{{ form.last_name.value|default:'' }}">
-                        </div>
-                        {% if form.last_name.errors %}
-                            <div class="error-message">{{ form.last_name.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_username" class="form-label">Username</label>
-                    <div class="input-group">
-                        <i class="fas fa-at input-icon"></i>
-                        <input type="text" 
-                               name="username" 
-                               id="id_username" 
-                               class="form-control" 
-                               placeholder="Choose a username"
-                               required
-                               value="{{ form.username.value|default:'' }}">
-                        <div class="username-availability"></div>
-                    </div>
-                    {% if form.username.errors %}
-                        <div class="error-message">{{ form.username.errors.0 }}</div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_email" class="form-label">Email Address</label>
-                    <div class="input-group">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" 
-                               name="email" 
-                               id="id_email" 
-                               class="form-control" 
-                               placeholder="Enter your email"
-                               required
-                               value="{{ form.email.value|default:'' }}">
-                    </div>
-                    {% if form.email.errors %}
-                        <div class="error-message">{{ form.email.errors.0 }}</div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_password1" class="form-label">Password</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" 
-                               name="password1" 
-                               id="id_password1" 
-                               class="form-control" 
-                               placeholder="Create a password"
-                               required>
-                        <button type="button" class="password-toggle" onclick="togglePassword('id_password1', this)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="password-strength" id="passwordStrength"></div>
-                    {% if form.password1.errors %}
-                        <div class="error-message">{{ form.password1.errors.0 }}</div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group">
-                    <label for="id_password2" class="form-label">Confirm Password</label>
-                    <div class="input-group">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" 
-                               name="password2" 
-                               id="id_password2" 
-                               class="form-control" 
-                               placeholder="Confirm your password"
-                               required>
-                        <button type="button" class="password-toggle" onclick="togglePassword('id_password2', this)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="password-match" id="passwordMatch"></div>
-                    {% if form.password2.errors %}
-                        <div class="error-message">{{ form.password2.errors.0 }}</div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-group checkbox-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" required>
-                        <span class="checkmark"></span>
-                        I agree to the <a href="#" class="link">Terms of Service</a> and <a href="#" class="link">Privacy Policy</a>
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-auth" id="submitBtn">
-                    <span class="btn-text">Create Account</span>
-                    <div class="btn-loader">
-                        <div class="loader"></div>
-                    </div>
-                </button>
-            </form>
-            
-            <div class="auth-divider">
-                <span>or sign up with</span>
-            </div>
-            
-            <div class="social-login">
-                <button class="btn btn-social btn-google">
-                    <i class="fab fa-google"></i>
-                    Google
-                </button>
-                <button class="btn btn-social btn-github">
-                    <i class="fab fa-github"></i>
-                    GitHub
-                </button>
-            </div>
-            
-            <div class="auth-footer">
-                <p>Already have an account? <a href="{% url 'login' %}" class="link">Sign in</a></p>
-            </div>
+    {% endif %}
+    <form method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_username">Username</label>
+            <input type="text" name="username" id="id_username" required>
         </div>
-    </div>
+        <div class="form-group">
+            <label for="id_first_name">First Name</label>
+            <input type="text" name="first_name" id="id_first_name" required>
+        </div>
+        <div class="form-group">
+            <label for="id_last_name">Last Name</label>
+            <input type="text" name="last_name" id="id_last_name" required>
+        </div>
+        <div class="form-group">
+            <label for="id_email">Email</label>
+            <input type="email" name="email" id="id_email" required>
+        </div>
+        <div class="form-group">
+            <label for="id_phone_number">Phone Number</label>
+            <input type="tel" name="phone_number" id="id_phone_number">
+        </div>
+        <div class="form-group">
+            <label for="id_bio">Bio</label>
+            <textarea name="bio" id="id_bio"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="id_location">Location</label>
+            <input type="text" name="location" id="id_location">
+        </div>
+        <div class="form-group">
+            <label for="id_password1">Password</label>
+            <input type="password" name="password1" id="id_password1" required>
+        </div>
+        <div class="form-group">
+            <label for="id_password2">Confirm Password</label>
+            <input type="password" name="password2" id="id_password2" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
 </div>
 
 <style>
-    .auth-container {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .signup-container {
+        max-width: 400px;
+        margin: 2rem auto;
         padding: 2rem;
-        position: relative;
-        background: var(--gradient-light);
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-
-    .auth-background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: 
-            radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.1) 0%, transparent 50%);
-        animation: backgroundFloat 20s ease-in-out infinite;
-    }
-
-    @keyframes backgroundFloat {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.8; }
-    }
-
-    .auth-card {
-        background: var(--white);
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-        padding: 2.5rem;
-        width: 100%;
-        max-width: 500px;
-        position: relative;
-        overflow: hidden;
-        animation: slideInUp 0.6s ease-out;
-    }
-
-    .signup-card {
-        max-width: 600px;
-    }
-
-    .auth-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-        background: var(--gradient);
-    }
-
-    @keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .auth-header {
+    h2 {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
+        color: #1F2937;
     }
-
-    .auth-title {
-        font-size: 2rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .auth-subtitle {
-        color: var(--text-light);
-        font-size: 1rem;
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-    }
-
     .form-group {
         margin-bottom: 1.5rem;
     }
-
-    .form-label {
+    .form-group label {
         display: block;
         margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: var(--text-color);
-        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1F2937;
     }
-
-    .input-group {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .input-icon {
-        position: absolute;
-        left: 1rem;
-        color: var(--text-light);
-        z-index: 1;
-    }
-
-    .form-control {
+    .form-group input,
+    .form-group textarea {
         width: 100%;
-        padding: 1rem 1rem 1rem 3rem;
-        border: 2px solid #e2e8f0;
-        border-radius: var(--border-radius);
+        padding: 0.85rem;
+        border: 2px solid #E5E7EB;
+        border-radius: 8px;
         font-size: 1rem;
-        transition: all 0.3s ease;
-        background: var(--white);
     }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        transform: translateY(-1px);
-    }
-
-    .password-toggle {
-        position: absolute;
-        right: 1rem;
-        background: none;
-        border: none;
-        color: var(--text-light);
-        cursor: pointer;
-        padding: 0.5rem;
-        border-radius: 50%;
-        transition: all 0.3s ease;
-    }
-
-    .password-toggle:hover {
-        background: rgba(0, 0, 0, 0.05);
-        color: var(--primary-color);
-    }
-
-    .password-strength {
-        margin-top: 0.5rem;
-        height: 4px;
-        background: #e2e8f0;
-        border-radius: 2px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .password-strength.weak {
-        background: linear-gradient(to right, #ef4444 0%, #ef4444 33%, #e2e8f0 33%);
-    }
-
-    .password-strength.medium {
-        background: linear-gradient(to right, #f59e0b 0%, #f59e0b 66%, #e2e8f0 66%);
-    }
-
-    .password-strength.strong {
-        background: linear-gradient(to right, #10b981 0%, #10b981 100%);
-    }
-
-    .password-match {
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    .password-match.match {
-        color: #10b981;
-    }
-
-    .password-match.no-match {
-        color: #ef4444;
-    }
-
-    .username-availability {
-        position: absolute;
-        right: 1rem;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    .username-availability.available {
-        color: #10b981;
-    }
-
-    .username-availability.taken {
-        color: #ef4444;
-    }
-
-    .checkbox-group {
-        display: flex;
-        align-items: center;
-    }
-
-    .checkbox-label {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        font-size: 0.9rem;
-        color: var(--text-light);
-    }
-
-    .checkbox-label input {
-        display: none;
-    }
-
-    .checkmark {
-        height: 20px;
-        width: 20px;
-        background-color: var(--white);
-        border: 2px solid #e2e8f0;
-        border-radius: 4px;
-        margin-right: 0.5rem;
-        position: relative;
-        transition: all 0.3s ease;
-    }
-
-    .checkbox-label:hover .checkmark {
-        border-color: var(--primary-color);
-    }
-
-    .checkbox-label input:checked ~ .checkmark {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
-
-    .checkmark::after {
-        content: '';
-        position: absolute;
-        display: none;
-        left: 7px;
-        top: 3px;
-        width: 5px;
-        height: 10px;
-        border: solid white;
-        border-width: 0 3px 3px 0;
-        transform: rotate(45deg);
-    }
-
-    .checkbox-label input:checked ~ .checkmark::after {
-        display: block;
-    }
-
-    .btn-auth {
+    .btn-primary {
         width: 100%;
-        padding: 1rem;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
         font-size: 1rem;
         font-weight: 600;
-        border-radius: var(--border-radius);
-        border: none;
         cursor: pointer;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
     }
-
-    .btn-auth:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-
-    .btn-loader {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .btn-auth.loading .btn-text {
-        opacity: 0;
-    }
-
-    .btn-auth.loading .btn-loader {
-        opacity: 1;
-    }
-
-    .loader {
-        width: 24px;
-        height: 24px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-top: 3px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .auth-divider {
-        position: relative;
-        text-align: center;
-        margin: 2rem 0;
-        color: var(--text-light);
-        font-size: 0.9rem;
-    }
-
-    .auth-divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #e2e8f0;
-        z-index: 0;
-    }
-
-    .auth-divider span {
-        background: var(--white);
-        padding: 0 1rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .social-login {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .btn-social {
-        padding: 0.8rem;
-        border: 2px solid #e2e8f0;
-        border-radius: var(--border-radius);
-        background: var(--white);
-        color: var(--text-color);
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-social:hover {
+    .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
-
-    .btn-google:hover {
-        border-color: #db4437;
-        color: #db4437;
+    .alert {
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        color: #fff;
     }
-
-    .btn-github:hover {
-        border-color: #333;
-        color: #333;
+    .alert.error {
+        background: #EF4444;
     }
-
-    .auth-footer {
-        text-align: center;
-        font-size: 0.9rem;
-        color: var(--text-light);
-    }
-
-    .link {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .link:hover {
-        text-decoration: underline;
-    }
-
-    .error-message {
-        color: #ef4444;
-        font-size: 0.8rem;
-        margin-top: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    .error-message::before {
-        content: '⚠';
-        font-size: 0.9rem;
-    }
-
-    @media (max-width: 768px) {
-        .auth-card {
-            padding: 1.5rem;
-            margin: 1rem;
-        }
-
-        .form-row {
-            grid-template-columns: 1fr;
-        }
-
-        .auth-title {
-            font-size: 1.8rem;
-        }
+    .alert.success {
+        background: #10B981;
     }
 </style>
-
-<script>
-    // Username availability check
-    let usernameTimeout;
-    const usernameInput = document.getElementById('id_username');
-    const availabilityDiv = document.querySelector('.username-availability');
-
-    usernameInput.addEventListener('input', function() {
-        clearTimeout(usernameTimeout);
-        const username = this.value;
-        
-        if (username.length < 3) {
-            availabilityDiv.innerHTML = '';
-            return;
-        }
-        
-        availabilityDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        
-        usernameTimeout = setTimeout(() => {
-            fetch("{% url 'check_username' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({username: username})
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.available) {
-                    availabilityDiv.innerHTML = '<i class="fas fa-check"></i> Available';
-                    availabilityDiv.className = 'username-availability available';
-                } else {
-                    availabilityDiv.innerHTML = '<i class="fas fa-times"></i> Taken';
-                    availabilityDiv.className = 'username-availability taken';
-                }
-            })
-            .catch(error => {
-                availabilityDiv.innerHTML = '';
-            });
-        }, 500);
-    });
-
-    // Password strength checker
-    const password1 = document.getElementById('id_password1');
-    const passwordStrength = document.getElementById('passwordStrength');
-
-    password1.addEventListener('input', function() {
-        const password = this.value;
-        const strength = checkPasswordStrength(password);
-        
-        passwordStrength.className = `password-strength ${strength}`;
-    });
-
-    function checkPasswordStrength(password) {
-        let score = 0;
-        if (password.length >= 8) score++;
-        if (/[a-z]/.test(password)) score++;
-        if (/[A-Z]/.test(password)) score++;
-        if (/[0-9]/.test(password)) score++;
-        if (/[^A-Za-z0-9]/.test(password)) score++;
-        
-        if (score < 3) return 'weak';
-        if (score < 4) return 'medium';
-        return 'strong';
-    }
-
-    // Password match checker
-    const password2 = document.getElementById('id_password2');
-    const passwordMatch = document.getElementById('passwordMatch');
-
-    password2.addEventListener('input', function() {
-        const password1Value = password1.value;
-        const password2Value = this.value;
-        
-        if (password2Value === '') {
-            passwordMatch.innerHTML = '';
-            passwordMatch.className = 'password-match';
-        } else if (password1Value === password2Value) {
-            passwordMatch.innerHTML = '<i class="fas fa-check"></i> Passwords match';
-            passwordMatch.className = 'password-match match';
-        } else {
-            passwordMatch.innerHTML = '<i class="fas fa-times"></i> Passwords do not match';
-            passwordMatch.className = 'password-match no-match';
-        }
-    });
-
-    // Toggle password visibility
-    function togglePassword(fieldId, button) {
-        const field = document.getElementById(fieldId);
-        const icon = button.querySelector('i');
-        
-        if (field.type === 'password') {
-            field.type = 'text';
-            icon.className = 'fas fa-eye-slash';
-        } else {
-            field.type = 'password';
-            icon.className = 'fas fa-eye';
-        }
-    }
-
-    // Form submission
-    const form = document.getElementById('signupForm');
-    const submitBtn = document.getElementById('submitBtn');
-
-    form.addEventListener('submit', function(e) {
-        submitBtn.classList.add('loading');
-        submitBtn.disabled = true;
-    });
-
-    // Auto-resize form on focus
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('focus', function() {
-            this.closest('.form-group').style.transform = 'scale(1.02)';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.closest('.form-group').style.transform = 'scale(1)';
-        });
-    });
-</script>
 {% endblock %}

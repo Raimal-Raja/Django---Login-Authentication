@@ -12,6 +12,11 @@
                         <i class="fas fa-user"></i>
                     </div>
                 {% endif %}
+                <div class="avatar-overlay">
+                    <i class="fas fa-camera"></i>
+                    <span>Change Photo</span>
+                </div>
+                <input type="file" name="avatar" id="avatar-upload-sidebar" accept="image/*" style="display: none;">
             </div>
             <h3>{{ user.get_full_name|default:user.username }}</h3>
             <p class="user-email">{{ user.email }}</p>
@@ -34,21 +39,62 @@
     </div>
     
     <div class="dashboard-content">
-        <!-- Profile Section -->
         <section id="profile-section" class="dashboard-section active">
-            <h2>Profile Information</h2>
-            <form method="post" enctype="multipart/form-data" class="profile-form">
+            <div class="section-header">
+                <h2>Profile Information</h2>
+                <p>View your current information and update your profile details below</p>
+            </div>
+            
+            <div class="current-info">
+                <h3>Current Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>First Name</label>
+                        <p>{{ user.first_name|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Last Name</label>
+                        <p>{{ user.last_name|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Email</label>
+                        <p>{{ user.email|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Bio</label>
+                        <p>{{ user.userprofile.bio|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Phone Number</label>
+                        <p>{{ user.userprofile.phone_number|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Location</label>
+                        <p>{{ user.userprofile.location|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Birth Date</label>
+                        <p>{{ user.userprofile.birth_date|date:"F d, Y"|default:"Not set" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>Website</label>
+                        <p>{{ user.userprofile.website|default:"Not set" }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data" class="profile-form" id="profile-form">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="profile">
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label>First Name</label>
-                        <input type="text" name="first_name" value="{{ user.first_name }}">
+                        <input type="text" name="first_name" value="{{ user.first_name }}" required>
                     </div>
                     <div class="form-group">
                         <label>Last Name</label>
-                        <input type="text" name="last_name" value="{{ user.last_name }}">
+                        <input type="text" name="last_name" value="{{ user.last_name }}" required>
                     </div>
                 </div>
                 
@@ -65,7 +111,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Phone Number</label>
-                        <input type="text" name="phone_number" value="{{ user.userprofile.phone_number }}">
+                        <input type="tel" name="phone_number" value="{{ user.userprofile.phone_number }}" pattern="[0-9]{10,}">
                     </div>
                     <div class="form-group">
                         <label>Location</label>
@@ -73,63 +119,85 @@
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Profile Picture</label>
-                    <div class="file-upload">
-                        <input type="file" name="avatar" id="avatar-upload" accept="image/*">
-                        <label for="avatar-upload" class="upload-btn">
-                            <i class="fas fa-upload"></i> Choose File
-                        </label>
-                        <span id="file-name">No file chosen</span>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Birth Date</label>
+                        <input type="date" name="birth_date" value="{{ user.userprofile.birth_date|date:'Y-m-d' }}">
                     </div>
+                    <div class="form-group">
+                        <label>Website</label>
+                        <input type="url" name="website" value="{{ user.userprofile.website }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Avatar</label>
+                    <input type="file" name="avatar" accept="image/*">
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Update Profile</button>
             </form>
         </section>
         
-        <!-- Security Section -->
+        <!-- Rest of the template remains unchanged -->
         <section id="security-section" class="dashboard-section">
-            <h2>Security Settings</h2>
-            <form method="post" class="security-form">
+            <div class="section-header">
+                <h2>Security Settings</h2>
+                <p>Manage your account password</p>
+            </div>
+            <form method="post" class="security-form" id="security-form">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="password">
                 
                 <div class="form-group">
                     <label>Current Password</label>
-                    <input type="password" name="current_password" required>
+                    <div class="password-container">
+                        <input type="password" name="current_password" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label>New Password</label>
-                    <input type="password" name="new_password1" required>
+                    <div class="password-container">
+                        <input type="password" name="new_password1" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
                 </div>
                 
                 <div class="form-group">
                     <label>Confirm New Password</label>
-                    <input type="password" name="new_password2" required>
+                    <div class="password-container">
+                        <input type="password" name="new_password2" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Change Password</button>
             </form>
         </section>
         
-        <!-- Delete Account Section -->
         <section id="delete-section" class="dashboard-section">
-            <h2>Delete Account</h2>
+            <div class="section-header">
+                <h2>Delete Account</h2>
+                <p>Permanently remove your account and data</p>
+            </div>
             <div class="delete-warning">
                 <i class="fas fa-exclamation-triangle"></i>
                 <h3>Warning: This action cannot be undone</h3>
                 <p>All your data will be permanently deleted from our systems.</p>
             </div>
             
-            <form method="post" class="delete-form">
+            <form method="post" class="delete-form" id="delete-form">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="delete">
                 
                 <div class="form-group">
                     <label>Enter your password to confirm</label>
-                    <input type="password" name="password" required>
+                    <div class="password-container">
+                        <input type="password" name="password" required>
+                        <i class="fas fa-eye toggle-password"></i>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn btn-danger">Delete My Account</button>
@@ -140,130 +208,246 @@
 
 <style>
     :root {
-        --primary-color: #6366f1;
-        --text-color: #1f2937;
-        --text-light: #6b7280;
-        --white: #ffffff;
-        --gradient: linear-gradient(to right, #667eea, #764ba2);
-        --gradient-light: linear-gradient(to right, #edf2f7, #e2e8f0);
-        --border-radius: 8px;
+        --primary-color: #4F46E5;
+        --secondary-color: #7C3AED;
+        --text-color: #1F2937;
+        --text-light: #6B7280;
+        --white: #FFFFFF;
+        --danger-color: #DC2626;
+        --gradient: linear-gradient(135deg, #4F46E5, #7C3AED);
+        --gradient-light: linear-gradient(135deg, #F5F7FA, #E5E7EB);
+        --border-radius: 12px;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     .dashboard-container {
-        display: grid;
-        grid-template-columns: 280px 1fr;
+        display: flex;
         min-height: calc(100vh - 80px);
-        padding-top: 80px;
+        background: #F3F4F6;
     }
 
     .dashboard-sidebar {
+        width: 300px;
         background: var(--white);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        padding: 2rem 1rem;
+        padding: 2rem 1.5rem;
         position: fixed;
         height: 100%;
-        width: 280px;
-        overflow-y: auto;
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+        z-index: 1000;
     }
 
     .user-profile-card {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
+        padding: 1.5rem;
+        background: var(--gradient-light);
+        border-radius: var(--border-radius);
+        transition: transform 0.3s ease;
+    }
+
+    .user-profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
     }
 
     .avatar-container {
-        width: 100px;
-        height: 100px;
-        margin: 0 auto 1rem;
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1.5rem;
         border-radius: 50%;
         overflow: hidden;
-        background: var(--gradient-light);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: var(--gradient);
+        border: 4px solid var(--white);
+        box-shadow: var(--shadow);
     }
 
     .avatar {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: opacity 0.3s ease;
     }
 
     .avatar-placeholder {
-        font-size: 2.5rem;
-        color: var(--primary-color);
+        font-size: 3rem;
+        color: var(--white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+        color: var(--white);
+    }
+
+    .avatar-container:hover .avatar-overlay {
+        opacity: 1;
+    }
+
+    .avatar-overlay i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .user-profile-card h3 {
-        font-size: 1.25rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.5rem;
+        font-weight: 600;
         color: var(--text-color);
+        margin-bottom: 0.5rem;
     }
 
     .user-email, .member-since {
         color: var(--text-light);
-        font-size: 0.9rem;
+        font-size: 0.95rem;
+        line-height: 1.5;
     }
 
     .member-since {
         font-style: italic;
+        opacity: 0.8;
     }
 
     .dashboard-nav ul {
         list-style: none;
-        padding: 0;
-        margin: 0;
     }
 
     .nav-item {
-        padding: 0.75rem 1rem;
-        margin-bottom: 0.5rem;
+        padding: 1rem 1.25rem;
+        margin: 0.5rem 0;
         border-radius: var(--border-radius);
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
         color: var(--text-color);
-        transition: background 0.3s ease, color 0.3s ease;
+        font-weight: 500;
+        transition: all 0.3s ease;
     }
 
     .nav-item:hover {
         background: var(--gradient-light);
-        color: var(--primary-color);
+        transform: translateX(5px);
+        box-shadow: var(--shadow);
     }
 
     .nav-item.active {
         background: var(--gradient);
         color: var(--white);
+        box-shadow: var(--shadow);
+    }
+
+    .nav-item i {
+        font-size: 1.2rem;
     }
 
     .dashboard-content {
-        padding: 2rem 3rem;
-        margin-left: 280px;
-        background: #f9fafb;
+        flex: 1;
+        margin-left: 300px;
+        padding: 3rem;
+        background: #F3F4F6;
         min-height: 100vh;
     }
 
     .dashboard-section {
         display: none;
-        animation: fadeIn 0.3s ease-out;
+        animation: slideIn 0.4s ease-out;
+        background: var(--white);
+        padding: 2rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
     }
 
     .dashboard-section.active {
         display: block;
     }
 
+    .section-header {
+        margin-bottom: 2rem;
+        border-bottom: 3px solid var(--primary-color);
+        padding-bottom: 1rem;
+    }
+
     .dashboard-section h2 {
-        font-size: 1.75rem;
+        font-size: 2rem;
+        font-weight: 700;
         color: var(--text-color);
-        margin-bottom: 1.25rem;
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-header p {
+        color: var(--text-light);
+        font-size: 1rem;
+    }
+
+    .current-info {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--gradient-light);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+    }
+
+    .current-info h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .info-item label {
+        font-weight: 600;
+        color: var(--text-color);
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-item p {
+        color: var(--text-color);
+        font-size: 1rem;
+        background: var(--white);
+        padding: 0.85rem 1rem;
+        border-radius: var(--border-radius);
+        border: 2px solid #E5E7EB;
     }
 
     .form-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
         margin-bottom: 1.5rem;
     }
@@ -274,189 +458,318 @@
 
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
         font-weight: 600;
         color: var(--text-color);
+        font-size: 0.95rem;
     }
 
     .form-group input,
-    .form-group textarea,
-    .form-group select {
+    .form-group textarea {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 1px solid #d1d5db;
+        padding: 0.85rem 1rem;
+        border: 2px solid #E5E7EB;
         border-radius: var(--border-radius);
         font-size: 1rem;
         color: var(--text-color);
         background: var(--white);
+        transition: all 0.3s ease;
     }
 
     .form-group input:focus,
     .form-group textarea:focus {
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         outline: none;
     }
 
     .form-group textarea {
-        min-height: 120px;
+        min-height: 150px;
         resize: vertical;
     }
 
-    .file-upload {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
+    .password-container {
+        position: relative;
     }
 
-    .upload-btn {
-        background: var(--gradient-light);
-        color: var(--primary-color);
-        padding: 0.6rem 1.2rem;
-        border-radius: var(--border-radius);
-        font-weight: 500;
+    .password-container input {
+        padding-right: 3rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
         cursor: pointer;
+        color: var(--text-light);
+        transition: color 0.3s ease;
+    }
+
+    .toggle-password:hover {
+        color: var(--primary-color);
+    }
+
+    .btn {
+        padding: 0.85rem 2rem;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        transition: background 0.3s ease;
-    }
-
-    .upload-btn:hover {
-        background: var(--gradient);
-        color: var(--white);
-    }
-
-    #avatar-upload {
-        display: none;
-    }
-
-    #file-name {
-        font-size: 0.9rem;
-        color: var(--text-light);
     }
 
     .btn.btn-primary {
         background: var(--gradient);
         color: var(--white);
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background 0.3s ease;
+        box-shadow: var(--shadow);
     }
 
     .btn.btn-primary:hover {
-        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
     }
 
-    .btn-danger {
-        background: linear-gradient(to right, #e53935, #d32f2f);
+    .btn.btn-danger {
+        background: linear-gradient(135deg, #DC2626, #B91C1C);
         color: var(--white);
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: var(--border-radius);
-        cursor: pointer;
-        font-size: 1rem;
+        box-shadow: var(--shadow);
     }
 
-    .btn-danger:hover {
-        background: linear-gradient(to right, #c62828, #b71c1c);
+    .btn.btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
     }
 
     .delete-warning {
-        background: #fff1f1;
-        border-left: 4px solid #e53935;
-        padding: 1.25rem;
+        background: #FEF2F2;
+        border-left: 5px solid var(--danger-color);
+        padding: 1.5rem;
         margin-bottom: 2rem;
         border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: var(--shadow);
     }
 
     .delete-warning i {
-        color: #e53935;
-        font-size: 1.25rem;
+        color: var(--danger-color);
+        font-size: 1.5rem;
     }
 
     .delete-warning h3 {
-        margin: 0.5rem 0;
-        color: #e53935;
+        color: var(--danger-color);
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
     }
 
     .delete-warning p {
         color: var(--text-light);
+        font-size: 0.95rem;
     }
 
-    @keyframes fadeIn {
+    @keyframes slideIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateX(20px);
         }
         to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(0);
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
         .dashboard-container {
-            grid-template-columns: 1fr;
+            flex-direction: column;
         }
 
         .dashboard-sidebar {
             position: static;
             width: 100%;
             height: auto;
+            padding: 1.5rem;
         }
 
         .dashboard-content {
             margin-left: 0;
+            padding: 2rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .form-row, .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-content {
             padding: 1.5rem;
         }
 
-        .form-row {
-            grid-template-columns: 1fr;
+        .dashboard-section {
+            padding: 1.5rem;
+        }
+
+        .avatar-container {
+            width: 100px;
+            height: 100px;
         }
     }
 </style>
-
 
 <script>
     // Dashboard navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
-            // Remove active class from all items
             document.querySelectorAll('.nav-item').forEach(navItem => {
                 navItem.classList.remove('active');
             });
-            
-            // Add active class to clicked item
             this.classList.add('active');
             
-            // Hide all sections
             document.querySelectorAll('.dashboard-section').forEach(section => {
                 section.classList.remove('active');
             });
             
-            // Show selected section
             const sectionId = this.getAttribute('data-section') + '-section';
             document.getElementById(sectionId).classList.add('active');
         });
     });
+
+    // Profile picture handling
+    const avatarContainer = document.querySelector('.avatar-container');
+    const avatarInput = document.getElementById('avatar-upload-sidebar');
     
-    // File upload display
-    document.getElementById('avatar-upload').addEventListener('change', function() {
-        const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
-        document.getElementById('file-name').textContent = fileName;
+    avatarContainer.addEventListener('click', () => {
+        avatarInput.click();
     });
-    
+
+    avatarInput.addEventListener('change', async function() {
+        if (this.files && this.files[0]) {
+            const formData = new FormData();
+            formData.append('avatar', this.files[0]);
+            formData.append('form_type', 'avatar');
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    document.querySelector('.avatar').src = data.avatar_url;
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.error || 'Failed to update profile picture.', 'error');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('An error occurred while uploading: ' + error.message, 'error');
+            }
+        }
+    });
+
+    // Password toggle
+    document.querySelectorAll('.toggle-password').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const type = input.type === 'password' ? 'text' : 'password';
+            input.type = type;
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    });
+
     // Form submission handling
     document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            try {
+                const response = await fetch(this.action || window.location.href, {
+                    method: 'POST',
+                    body: new FormData(this)
+                });
+                
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    showToast(data.message, 'success');
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else if (data.avatar_url) {
+                        document.querySelector('.avatar').src = data.avatar_url;
+                    } else if (this.id === 'profile-form') {
+                        // Refresh page to update current information
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                } else {
+                    showToast(data.error || 'An error occurred.', 'error');
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showToast('An error occurred while processing: ' + error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = submitBtn.classList.contains('btn-danger') ? 
+                    'Delete My Account' : submitBtn.classList.contains('security-form') ? 
+                    'Change Password' : 'Update Profile';
+            }
         });
     });
+
+    // Toast notification
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }, 100);
+    }
+
+    // Toast styles
+    const toastStyles = `
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--border-radius);
+            color: var(--white);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        .toast-error {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+        }
+    `;
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = toastStyles;
+    document.head.appendChild(styleSheet);
 </script>
 {% endblock %}

@@ -7,10 +7,13 @@ class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
     first_name = forms.CharField(max_length=30, required=True)
     last_name = forms.CharField(max_length=30, required=True)
+    phone_number = forms.CharField(max_length=15, required=False)
+    bio = forms.CharField(max_length=500, required=False, widget=forms.Textarea)
+    location = forms.CharField(max_length=30, required=False)
 
     class Meta:
         model = User
-        fields = ("username", "first_name", "last_name", "email", "password1", "password2")
+        fields = ("username", "first_name", "last_name", "email", "phone_number", "bio", "location", "password1", "password2")
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -19,6 +22,12 @@ class CustomUserCreationForm(UserCreationForm):
         user.last_name = self.cleaned_data["last_name"]
         if commit:
             user.save()
+            # Create or update UserProfile
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.phone_number = self.cleaned_data["phone_number"]
+            profile.bio = self.cleaned_data["bio"]
+            profile.location = self.cleaned_data["location"]
+            profile.save()
         return user
 
 class UserProfileForm(forms.ModelForm):
